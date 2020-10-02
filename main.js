@@ -16,6 +16,18 @@ const mod = {
 		return (new (require('jshashes')).SHA256).hex_hmac(param1, param2);
 	},
 
+	OLSKCryptoShortHash (inputData) {
+		if (typeof inputData !== 'string') {
+			throw new Error('RCSErrorInputNotValid');
+		}
+
+		if (!inputData.trim()) {
+			throw new Error('RCSErrorInputNotValid');
+		}
+
+		return mod.OLSKCryptoHMACSHA256Hash(inputData, inputData).slice(0, 32);
+	},
+
 };
 
 Object.assign(exports, mod);

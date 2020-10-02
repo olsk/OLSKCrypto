@@ -32,3 +32,23 @@ describe('OLSKCryptoHMACSHA256Hash', function test_OLSKCryptoHMACSHA256Hash() {
 	});
 
 });
+
+describe('OLSKCryptoShortHash', function test_OLSKCryptoShortHash() {
+
+	it('throws if param1 not string', function () {
+		throws(function () {
+			mod.OLSKCryptoShortHash(null);
+		}, /RCSErrorInputNotValid/);
+	});
+	
+	it('throws if param1 not filled', function () {
+		throws(function () {
+			mod.OLSKCryptoShortHash(' ');
+		}, /RCSErrorInputNotValid/);
+	});
+	
+	it('returns string', function () {
+		deepEqual(mod.OLSKCryptoShortHash('alfa'), mod.OLSKCryptoHMACSHA256Hash('alfa', 'alfa').slice(0, 32));
+	});
+
+});
