@@ -1,4 +1,6 @@
 {
+  "name": "OLSKCrypto",
+  "main": "main.js",
   "dependencies": {
     "jshashes": "latest"
   }
