@@ -1,3 +1,5 @@
+const openpgp = require('openpgp');
+
 const mod = {
 
 	OLSKCryptoHMACSHA256Hash (param1, param2) {
@@ -53,10 +55,10 @@ const mod = {
 			return Promise.reject(new Error('OLSKErrorInputNotValid'));
 		}
 
-    return (await require('openpgp').encrypt({
-      message: require('openpgp').message.fromText(param3),
-      publicKeys: [(await require('openpgp').key.readArmored(param1)).keys[0]],
-      privateKeys: [(await require('openpgp').key.readArmored(param2)).keys[0]],
+    return (await openpgp.encrypt({
+      message: openpgp.message.fromText(param3),
+      publicKeys: [(await openpgp.key.readArmored(param1)).keys[0]],
+      privateKeys: [(await openpgp.key.readArmored(param2)).keys[0]],
     })).data;
 	},
 
@@ -85,10 +87,10 @@ const mod = {
 			return Promise.reject(new Error('OLSKErrorInputNotValid'));
 		}
 
-		const { data: decrypted, signatures: [{valid: isSigned}] } = await require('openpgp').decrypt({
-		  message: await require('openpgp').message.readArmored(param3),
-		  privateKeys: [(await require('openpgp').key.readArmored(param1)).keys[0]],
-		  publicKeys: [(await require('openpgp').key.readArmored(param2)).keys[0]],
+		const { data: decrypted, signatures: [{valid: isSigned}] } = await openpgp.decrypt({
+		  message: await openpgp.message.readArmored(param3),
+		  privateKeys: [(await openpgp.key.readArmored(param1)).keys[0]],
+		  publicKeys: [(await openpgp.key.readArmored(param2)).keys[0]],
 		});
 
 		if (!isSigned) {

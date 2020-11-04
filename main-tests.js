@@ -2,6 +2,8 @@ const { throws, rejects, deepEqual } = require('assert');
 
 const mod = require('./main.js');
 
+const openpgp = require('openpgp');
+
 describe('OLSKCryptoHMACSHA256Hash', function test_OLSKCryptoHMACSHA256Hash() {
 
 	it('throws if param1 not string', function () {
@@ -139,8 +141,6 @@ describe('OLSKCryptoDecryptSigned', function test_OLSKCryptoDecryptSigned() {
 	});
 	
 	it('rejects if not signed', async function () {
-		const openpgp = require('openpgp');
-
 		const sender = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
 		const receiver = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
 
@@ -157,8 +157,6 @@ describe('OLSKCryptoDecryptSigned', function test_OLSKCryptoDecryptSigned() {
 	
 	it('returns string', async function () {
 		const item = Math.random().toString();
-
-		const openpgp = require('openpgp');
 
 		const sender = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
 		const receiver = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
