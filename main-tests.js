@@ -7,19 +7,19 @@ describe('OLSKCryptoHMACSHA256Hash', function test_OLSKCryptoHMACSHA256Hash() {
 	it('throws if param1 not string', function () {
 		throws(function () {
 			mod.OLSKCryptoHMACSHA256Hash(null, 'bravo');
-		}, /RCSErrorInputNotValid/);
+		}, /OLSKErrorInputNotValid/);
 	});
 	
 	it('throws if param1 not filled', function () {
 		throws(function () {
 			mod.OLSKCryptoHMACSHA256Hash(' ', 'bravo');
-		}, /RCSErrorInputNotValid/);
+		}, /OLSKErrorInputNotValid/);
 	});
 	
 	it('throws if param2 not string', function () {
 		throws(function () {
 			mod.OLSKCryptoHMACSHA256Hash('alfa', null);
-		}, /RCSErrorInputNotValid/);
+		}, /OLSKErrorInputNotValid/);
 	});
 	
 	it('returns string', function () {
@@ -38,13 +38,13 @@ describe('OLSKCryptoShortHash', function test_OLSKCryptoShortHash() {
 	it('throws if param1 not string', function () {
 		throws(function () {
 			mod.OLSKCryptoShortHash(null);
-		}, /RCSErrorInputNotValid/);
+		}, /OLSKErrorInputNotValid/);
 	});
 	
 	it('throws if param1 not filled', function () {
 		throws(function () {
 			mod.OLSKCryptoShortHash(' ');
-		}, /RCSErrorInputNotValid/);
+		}, /OLSKErrorInputNotValid/);
 	});
 	
 	it('returns string', function () {

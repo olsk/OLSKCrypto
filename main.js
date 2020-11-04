@@ -2,15 +2,15 @@ const mod = {
 
 	OLSKCryptoHMACSHA256Hash (param1, param2) {
 		if (typeof param1 !== 'string') {
-			throw new Error('RCSErrorInputNotValid');
+			throw new Error('OLSKErrorInputNotValid');
 		}
 
 		if (!param1.trim()) {
-			throw new Error('RCSErrorInputNotValid');
+			throw new Error('OLSKErrorInputNotValid');
 		}
 
 		if (typeof param2 !== 'string') {
-			throw new Error('RCSErrorInputNotValid');
+			throw new Error('OLSKErrorInputNotValid');
 		}
 
 		return (new (require('jshashes')).SHA256).hex_hmac(param1, param2);
@@ -18,11 +18,11 @@ const mod = {
 
 	OLSKCryptoShortHash (inputData) {
 		if (typeof inputData !== 'string') {
-			throw new Error('RCSErrorInputNotValid');
+			throw new Error('OLSKErrorInputNotValid');
 		}
 
 		if (!inputData.trim()) {
-			throw new Error('RCSErrorInputNotValid');
+			throw new Error('OLSKErrorInputNotValid');
 		}
 
 		return mod.OLSKCryptoHMACSHA256Hash(inputData, inputData).slice(0, 32);
