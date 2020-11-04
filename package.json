@@ -2,6 +2,7 @@
   "name": "OLSKCrypto",
   "main": "main.js",
   "dependencies": {
-    "jshashes": "latest"
+    "jshashes": "latest",
+    "openpgp": "latest"
   }
 }
