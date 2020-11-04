@@ -60,6 +60,44 @@ const mod = {
     })).data;
 	},
 
+	async OLSKCryptoDecryptSigned (param1, param2, param3) {
+		if (typeof param1 !== 'string') {
+			return Promise.reject(new Error('OLSKErrorInputNotValid'));
+		}
+
+		if (!param1.trim()) {
+			return Promise.reject(new Error('OLSKErrorInputNotValid'));
+		}
+
+		if (typeof param2 !== 'string') {
+			return Promise.reject(new Error('OLSKErrorInputNotValid'));
+		}
+
+		if (!param2.trim()) {
+			return Promise.reject(new Error('OLSKErrorInputNotValid'));
+		}
+
+		if (typeof param3 !== 'string') {
+			return Promise.reject(new Error('OLSKErrorInputNotValid'));
+		}
+
+		if (!param3.trim()) {
+			return Promise.reject(new Error('OLSKErrorInputNotValid'));
+		}
+
+		const { data: decrypted, signatures: [{valid: isSigned}] } = await require('openpgp').decrypt({
+		  message: await require('openpgp').message.readArmored(param3),
+		  privateKeys: [(await require('openpgp').key.readArmored(param1)).keys[0]],
+		  publicKeys: [(await require('openpgp').key.readArmored(param2)).keys[0]],
+		});
+
+		if (!isSigned) {
+			return Promise.reject(new Error('OLSKErrorNotSigned'));
+		}
+
+		return decrypted;
+	},
+
 };
 
 Object.assign(exports, mod);
