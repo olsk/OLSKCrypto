@@ -4,6 +4,17 @@ const mod = require('./main.js');
 
 const openpgp = require('openpgp');
 
+const sender = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
+const receiver = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
+
+const pairs = {
+	PAIR_RECEIVER_PRIVATE: receiver.privateKeyArmored,
+	PAIR_SENDER_PUBLIC: sender.publicKeyArmored,
+
+	PAIR_RECEIVER_PUBLIC: receiver.publicKeyArmored,
+	PAIR_SENDER_PRIVATE: sender.privateKeyArmored,
+};
+
 describe('OLSKCryptoHMACSHA256Hash', function test_OLSKCryptoHMACSHA256Hash() {
 
 	it('throws if param1 not string', function () {
@@ -86,17 +97,6 @@ describe('OLSKCryptoEncryptSigned', function test_OLSKCryptoEncryptSigned() {
 
 		const openpgp = require('openpgp');
 
-		const sender = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
-		const receiver = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
-
-		const pairs = {
-			PAIR_RECEIVER_PRIVATE: receiver.privateKeyArmored,
-			PAIR_SENDER_PUBLIC: sender.publicKeyArmored,
-
-			PAIR_RECEIVER_PUBLIC: receiver.publicKeyArmored,
-			PAIR_SENDER_PRIVATE: sender.privateKeyArmored,
-		};
-
 		const { data: decrypted, signatures: [{valid: isValid}] } = await openpgp.decrypt({
 		  message: await openpgp.message.readArmored(await mod.OLSKCryptoEncryptSigned(pairs.PAIR_RECEIVER_PUBLIC, pairs.PAIR_SENDER_PRIVATE, item)),
 		  privateKeys: [(await openpgp.key.readArmored(pairs.PAIR_RECEIVER_PRIVATE)).keys[0]],
@@ -141,33 +141,11 @@ describe('OLSKCryptoDecryptSigned', function test_OLSKCryptoDecryptSigned() {
 	});
 	
 	it('rejects if not signed', async function () {
-		const sender = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
-		const receiver = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
-
-		const pairs = {
-			PAIR_RECEIVER_PRIVATE: receiver.privateKeyArmored,
-			PAIR_SENDER_PUBLIC: sender.publicKeyArmored,
-
-			PAIR_RECEIVER_PUBLIC: receiver.publicKeyArmored,
-			PAIR_SENDER_PRIVATE: sender.privateKeyArmored,
-		};
-
 		await rejects(mod.OLSKCryptoDecryptSigned(pairs.PAIR_RECEIVER_PRIVATE, pairs.PAIR_RECEIVER_PUBLIC, await mod.OLSKCryptoEncryptSigned(pairs.PAIR_RECEIVER_PUBLIC, pairs.PAIR_SENDER_PRIVATE, Math.random().toString())), /OLSKErrorNotSigned/);
 	});
 	
 	it('returns string', async function () {
 		const item = Math.random().toString();
-
-		const sender = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
-		const receiver = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
-
-		const pairs = {
-			PAIR_RECEIVER_PRIVATE: receiver.privateKeyArmored,
-			PAIR_SENDER_PUBLIC: sender.publicKeyArmored,
-
-			PAIR_RECEIVER_PUBLIC: receiver.publicKeyArmored,
-			PAIR_SENDER_PRIVATE: sender.privateKeyArmored,
-		};
 
 		deepEqual(await mod.OLSKCryptoDecryptSigned(pairs.PAIR_RECEIVER_PRIVATE, pairs.PAIR_SENDER_PUBLIC, await mod.OLSKCryptoEncryptSigned(pairs.PAIR_RECEIVER_PUBLIC, pairs.PAIR_SENDER_PRIVATE, item)), item);
 	});
