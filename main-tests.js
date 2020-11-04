@@ -4,15 +4,17 @@ const mod = require('./main.js');
 
 const openpgp = require('openpgp');
 
-const sender = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
-const receiver = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
+const uPairs = async function () {
+	const sender = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
+	const receiver = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
 
-const pairs = {
-	PAIR_RECEIVER_PRIVATE: receiver.privateKeyArmored,
-	PAIR_SENDER_PUBLIC: sender.publicKeyArmored,
+	return {
+		PAIR_RECEIVER_PRIVATE: receiver.privateKeyArmored,
+		PAIR_SENDER_PUBLIC: sender.publicKeyArmored,
 
-	PAIR_RECEIVER_PUBLIC: receiver.publicKeyArmored,
-	PAIR_SENDER_PRIVATE: sender.privateKeyArmored,
+		PAIR_RECEIVER_PUBLIC: receiver.publicKeyArmored,
+		PAIR_SENDER_PRIVATE: sender.privateKeyArmored,
+	};
 };
 
 describe('OLSKCryptoHMACSHA256Hash', function test_OLSKCryptoHMACSHA256Hash() {
@@ -94,8 +96,7 @@ describe('OLSKCryptoEncryptSigned', function test_OLSKCryptoEncryptSigned() {
 	
 	it('returns string', async function () {
 		const item = Math.random().toString();
-
-		const openpgp = require('openpgp');
+		const pairs = await uPairs();
 
 		const { data: decrypted, signatures: [{valid: isValid}] } = await openpgp.decrypt({
 		  message: await openpgp.message.readArmored(await mod.OLSKCryptoEncryptSigned(pairs.PAIR_RECEIVER_PUBLIC, pairs.PAIR_SENDER_PRIVATE, item)),
@@ -141,11 +142,13 @@ describe('OLSKCryptoDecryptSigned', function test_OLSKCryptoDecryptSigned() {
 	});
 	
 	it('rejects if not signed', async function () {
+		const pairs = await uPairs();
 		await rejects(mod.OLSKCryptoDecryptSigned(pairs.PAIR_RECEIVER_PRIVATE, pairs.PAIR_RECEIVER_PUBLIC, await mod.OLSKCryptoEncryptSigned(pairs.PAIR_RECEIVER_PUBLIC, pairs.PAIR_SENDER_PRIVATE, Math.random().toString())), /OLSKErrorNotSigned/);
 	});
 	
 	it('returns string', async function () {
 		const item = Math.random().toString();
+		const pairs = await uPairs();
 
 		deepEqual(await mod.OLSKCryptoDecryptSigned(pairs.PAIR_RECEIVER_PRIVATE, pairs.PAIR_SENDER_PUBLIC, await mod.OLSKCryptoEncryptSigned(pairs.PAIR_RECEIVER_PUBLIC, pairs.PAIR_SENDER_PRIVATE, item)), item);
 	});
