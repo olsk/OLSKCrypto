@@ -100,6 +100,30 @@ const mod = {
 		return decrypted;
 	},
 
+	OLSKCryptoEncryptGuardMiddleware (req, res, next) {
+		return next((function (inputData) {
+			if (typeof inputData !== 'object' || inputData === null) {
+				throw new Error('RCSErrorInputNotValid');
+			}
+
+			if (!inputData.OLSK_CRYPTO_PAIR_RECEIVER_PUBLIC) {
+				return new Error('OLSK_CRYPTO_PAIR_RECEIVER_PUBLIC not defined');
+			}
+
+			if (!inputData.OLSK_CRYPTO_PAIR_RECEIVER_PUBLIC.trim()) {
+				return new Error('OLSK_CRYPTO_PAIR_RECEIVER_PUBLIC blank');
+			}
+
+			if (!inputData.OLSK_CRYPTO_PAIR_SENDER_PRIVATE) {
+				return new Error('OLSK_CRYPTO_PAIR_SENDER_PRIVATE not defined');
+			}
+
+			if (!inputData.OLSK_CRYPTO_PAIR_SENDER_PRIVATE.trim()) {
+				return new Error('OLSK_CRYPTO_PAIR_SENDER_PRIVATE blank');
+			}
+		})(req._FakeEnv || process.env));
+	},
+
 };
 
 Object.assign(exports, mod);
