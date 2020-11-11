@@ -1,4 +1,4 @@
-const openpgp = require('openpgp');
+const cryptico = require('cryptico');
 
 const mod = {
 
@@ -55,11 +55,7 @@ const mod = {
 			return Promise.reject(new Error('OLSKErrorInputNotValid'));
 		}
 
-    return (await openpgp.encrypt({
-      message: openpgp.message.fromText(param3),
-      publicKeys: [(await openpgp.key.readArmored(param1)).keys[0]],
-      privateKeys: [(await openpgp.key.readArmored(param2)).keys[0]],
-    })).data;
+		return cryptico.encrypt(param3, param1, cryptico.RSAKey.parse(param2)).cipher;
 	},
 
 	async OLSKCryptoDecryptSigned (param1, param2, param3) {
@@ -87,17 +83,13 @@ const mod = {
 			return Promise.reject(new Error('OLSKErrorInputNotValid'));
 		}
 
-		const { data: decrypted, signatures: [{valid: isSigned}] } = await openpgp.decrypt({
-		  message: await openpgp.message.readArmored(param3),
-		  privateKeys: [(await openpgp.key.readArmored(param1)).keys[0]],
-		  publicKeys: [(await openpgp.key.readArmored(param2)).keys[0]],
-		});
+		const data = cryptico.decrypt(param3, cryptico.RSAKey.parse(param1))
 
-		if (!isSigned) {
+		if (data.signature !== 'verified' || data.publicKeyString !== param2) {
 			return Promise.reject(new Error('OLSKErrorNotSigned'));
 		}
 
-		return decrypted;
+		return data.plaintext;
 	},
 
 	OLSKCryptoEncryptGuardMiddleware (req, res, next) {

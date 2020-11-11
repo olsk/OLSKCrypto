@@ -2,18 +2,18 @@ const { throws, rejects, deepEqual } = require('assert');
 
 const mod = require('./main.js');
 
-const openpgp = require('openpgp');
+const cryptico = require('cryptico');
 
 const uPairs = async function () {
-	const sender = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
-	const receiver = await openpgp.generateKey({ userIds: [{ id: Math.random() }] });
+	const sender = cryptico.generateRSAKey(Math.random().toString(), 1024);
+	const receiver = cryptico.generateRSAKey(Math.random().toString(), 1024);
 
 	return {
-		PAIR_RECEIVER_PRIVATE: receiver.privateKeyArmored,
-		PAIR_SENDER_PUBLIC: sender.publicKeyArmored,
+		PAIR_RECEIVER_PRIVATE: JSON.stringify(receiver.toJSON()),
+		PAIR_SENDER_PUBLIC: cryptico.publicKeyString(sender),
 
-		PAIR_RECEIVER_PUBLIC: receiver.publicKeyArmored,
-		PAIR_SENDER_PRIVATE: sender.privateKeyArmored,
+		PAIR_RECEIVER_PUBLIC: cryptico.publicKeyString(receiver),
+		PAIR_SENDER_PRIVATE: JSON.stringify(sender.toJSON()),
 	};
 };
 
@@ -98,18 +98,11 @@ describe('OLSKCryptoEncryptSigned', function test_OLSKCryptoEncryptSigned() {
 		const item = Math.random().toString();
 		const pairs = await uPairs();
 
-		const { data: decrypted, signatures: [{valid: isValid}] } = await openpgp.decrypt({
-		  message: await openpgp.message.readArmored(await mod.OLSKCryptoEncryptSigned(pairs.PAIR_RECEIVER_PUBLIC, pairs.PAIR_SENDER_PRIVATE, item)),
-		  privateKeys: [(await openpgp.key.readArmored(pairs.PAIR_RECEIVER_PRIVATE)).keys[0]],
-		  publicKeys: [(await openpgp.key.readArmored(pairs.PAIR_SENDER_PUBLIC)).keys[0]],
-		});
-
-		deepEqual({
-			decrypted,
-			isValid,
-		}, {
-			decrypted: item,
-			isValid: true,
+		deepEqual(cryptico.decrypt(await mod.OLSKCryptoEncryptSigned(pairs.PAIR_RECEIVER_PUBLIC, pairs.PAIR_SENDER_PRIVATE, item), cryptico.RSAKey.parse(pairs.PAIR_RECEIVER_PRIVATE)), {
+			plaintext: item,
+			status: 'success',
+			signature: 'verified',
+			publicKeyString: pairs.PAIR_SENDER_PUBLIC,
 		});
 	});
 	

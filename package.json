@@ -3,6 +3,6 @@
   "main": "main.js",
   "dependencies": {
     "jshashes": "latest",
-    "openpgp": "latest"
+    "cryptico": "rosano/cryptico"
   }
 }
