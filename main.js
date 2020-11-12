@@ -1,4 +1,5 @@
-const cryptico = require('cryptico');
+const _cryptico = require('cryptico');
+const cryptico = _cryptico.default || _cryptico;
 
 const mod = {
 
