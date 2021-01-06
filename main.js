@@ -131,6 +131,38 @@ const mod = {
 		return aesjs.utils.utf8.fromBytes((new aesjs.ModeOfOperation.ctr(key)).decrypt(aesjs.utils.hex.toBytes(param2)));
 	},
 
+	OLSKCryptoAESFunctions (inputData) {
+		if (typeof inputData !== 'string') {
+			throw new Error('OLSKErrorInputNotValid');
+		}
+
+		if (!inputData.trim()) {
+			throw new Error('OLSKErrorInputNotValid');
+		}
+
+		const _OLSKCryptoAESFunctionsKey = mod.OLSKCryptoBcryptKey(inputData);
+
+		return {
+			_OLSKCryptoAESFunctionsKey,
+
+			OLSKCryptoAESFunctionsEncrypt: (function (inputData) {
+				if (typeof inputData !== 'string') {
+					throw new Error('OLSKErrorInputNotValid');
+				}
+
+				return mod.OLSKCryptoAESEncrypt(_OLSKCryptoAESFunctionsKey, inputData);
+			}).bind(null),
+
+			OLSKCryptoAESFunctionsDecrypt: (function (inputData) {
+				if (typeof inputData !== 'string') {
+					throw new Error('OLSKErrorInputNotValid');
+				}
+
+				return mod.OLSKCryptoAESDecrypt(_OLSKCryptoAESFunctionsKey, inputData);
+			}).bind(null),
+		};
+	},	
+
 };
 
 Object.assign(exports, mod);

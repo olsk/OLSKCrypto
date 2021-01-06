@@ -225,3 +225,63 @@ describe('OLSKCryptoAESDecrypt', function test_OLSKCryptoAESDecrypt() {
 	});
 	
 });
+
+describe('OLSKCryptoAESFunctions', function test_OLSKCryptoAESFunctions() {
+
+	it('throws if not string', function () {
+		throws(function () {
+			mod.OLSKCryptoAESFunctions(null);
+		}, /OLSKErrorInputNotValid/);
+	});
+	
+	it('throws if not filled', function () {
+		throws(function () {
+			mod.OLSKCryptoAESFunctions(' ');
+		}, /OLSKErrorInputNotValid/);
+	});
+	
+	it('returns object', function () {
+		deepEqual(typeof mod.OLSKCryptoAESFunctions(mod.OLSKCryptoBcryptHash(Math.random().toString())), 'object');
+	});
+
+	context('OLSKCryptoAESFunctionsEncrypt', function () {
+
+		it('throws if not string', function () {
+			throws(function () {
+				mod.OLSKCryptoAESFunctions(mod.OLSKCryptoBcryptHash(Math.random().toString())).OLSKCryptoAESFunctionsEncrypt(null);
+			}, /OLSKErrorInputNotValid/);
+		});
+		
+		it('returns string', function () {
+			const object = mod.OLSKCryptoAESFunctions(mod.OLSKCryptoBcryptHash(Math.random().toString()));
+			const message = Math.random().toString();
+			deepEqual(object.OLSKCryptoAESFunctionsEncrypt(message), mod.OLSKCryptoAESEncrypt(object._OLSKCryptoAESFunctionsKey, message));
+		});
+
+		it('stringifies to native code', function () {
+			deepEqual(mod.OLSKCryptoAESFunctions(mod.OLSKCryptoBcryptHash(Math.random().toString())).OLSKCryptoAESFunctionsEncrypt.toString(), 'function () { [native code] }');
+		});
+	
+	});
+
+	context('OLSKCryptoAESFunctionsDecrypt', function () {
+
+		it('throws if not string', function () {
+			throws(function () {
+				mod.OLSKCryptoAESFunctions(mod.OLSKCryptoBcryptHash(Math.random().toString())).OLSKCryptoAESFunctionsDecrypt(null);
+			}, /OLSKErrorInputNotValid/);
+		});
+		
+		it('returns string', function () {
+			const object = mod.OLSKCryptoAESFunctions(mod.OLSKCryptoBcryptHash(Math.random().toString()));
+			const message = Math.random().toString();
+			deepEqual(object.OLSKCryptoAESFunctionsDecrypt(object.OLSKCryptoAESFunctionsEncrypt(message)), message);
+		});
+
+		it('stringifies to native code', function () {
+			deepEqual(mod.OLSKCryptoAESFunctions(mod.OLSKCryptoBcryptHash(Math.random().toString())).OLSKCryptoAESFunctionsDecrypt.toString(), 'function () { [native code] }');
+		});
+	
+	});
+
+});
