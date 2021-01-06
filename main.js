@@ -1,5 +1,6 @@
 const _cryptico = require('cryptico');
 const cryptico = _cryptico.default || _cryptico;
+const bcrypt = require('bcryptjs');
 
 const mod = {
 
@@ -91,6 +92,18 @@ const mod = {
 		}
 
 		return data.plaintext;
+	},
+
+	OLSKCryptoBcryptHash (inputData) {
+		if (typeof inputData !== 'string') {
+			throw new Error('OLSKErrorInputNotValid');
+		}
+
+		if (!inputData.trim()) {
+			throw new Error('OLSKErrorInputNotValid');
+		}
+
+		return bcrypt.hashSync(inputData);
 	},
 
 };

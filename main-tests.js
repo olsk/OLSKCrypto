@@ -147,3 +147,32 @@ describe('OLSKCryptoDecryptSigned', function test_OLSKCryptoDecryptSigned() {
 	});
 	
 });
+
+describe('OLSKCryptoBcryptHash', function test_OLSKCryptoBcryptHash() {
+
+	it('throws if not string', function () {
+		throws(function () {
+			mod.OLSKCryptoBcryptHash(null);
+		}, /OLSKErrorInputNotValid/);
+	});
+	
+	it('throws if not filled', function () {
+		throws(function () {
+			mod.OLSKCryptoBcryptHash(' ');
+		}, /OLSKErrorInputNotValid/);
+	});
+	
+	it('returns string', function () {
+		const item = Math.random().toString();
+		deepEqual(typeof mod.OLSKCryptoBcryptHash(item), 'string');
+	});
+
+	it('returns unique value', function() {
+		const inputData = Math.random().toString();
+		const item = Array.from(Array(10)).map(function () {
+			return mod.OLSKCryptoBcryptHash(inputData);
+		});
+		deepEqual([...(new Set(item))], item);
+	});
+
+});
