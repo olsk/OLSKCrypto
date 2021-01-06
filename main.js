@@ -1,6 +1,7 @@
 const _cryptico = require('cryptico');
 const cryptico = _cryptico.default || _cryptico;
 const bcrypt = require('bcryptjs');
+const aesjs = require('aes-js');
 
 const mod = {
 
@@ -104,6 +105,14 @@ const mod = {
 		}
 
 		return bcrypt.hashSync(inputData);
+	},
+
+	OLSKCryptoBcryptKey (inputData) {
+		if (typeof inputData !== 'string') {
+			throw new Error('OLSKErrorInputNotValid');
+		}
+
+		return aesjs.utils.utf8.toBytes(inputData.replace(bcrypt.getSalt(inputData), ' '));
 	},
 
 };

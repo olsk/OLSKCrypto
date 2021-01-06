@@ -2,6 +2,7 @@
   "name": "OLSKCrypto",
   "main": "main.js",
   "dependencies": {
+  	"aes-js": "latest",
   	"bcryptjs": "latest",
     "jshashes": "latest",
     "cryptico": "rosano/cryptico"

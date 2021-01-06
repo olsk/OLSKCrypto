@@ -3,6 +3,8 @@ const { throws, rejects, deepEqual } = require('assert');
 const mod = require('./main.js');
 
 const cryptico = require('cryptico');
+const aesjs = require('aes-js');
+const bcrypt = require('bcryptjs');
 
 const uPairs = async function () {
 	const sender = cryptico.generateRSAKey(Math.random().toString(), 1024);
@@ -173,6 +175,21 @@ describe('OLSKCryptoBcryptHash', function test_OLSKCryptoBcryptHash() {
 			return mod.OLSKCryptoBcryptHash(inputData);
 		});
 		deepEqual([...(new Set(item))], item);
+	});
+
+});
+
+describe('OLSKCryptoBcryptKey', function test_OLSKCryptoBcryptKey() {
+
+	it('throws if not string', function () {
+		throws(function () {
+			mod.OLSKCryptoBcryptKey(null);
+		}, /OLSKErrorInputNotValid/);
+	});
+	
+	it('returns key', function () {
+		const item = mod.OLSKCryptoBcryptHash(Math.random().toString());
+		deepEqual(mod.OLSKCryptoBcryptKey(item), aesjs.utils.utf8.toBytes(item.replace(bcrypt.getSalt(item), ' ')));
 	});
 
 });
