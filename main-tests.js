@@ -50,13 +50,13 @@ describe('OLSKCryptoHMACSHA256Hash', function test_OLSKCryptoHMACSHA256Hash() {
 
 describe('OLSKCryptoShortHash', function test_OLSKCryptoShortHash() {
 
-	it('throws if param1 not string', function () {
+	it('throws if not string', function () {
 		throws(function () {
 			mod.OLSKCryptoShortHash(null);
 		}, /OLSKErrorInputNotValid/);
 	});
 	
-	it('throws if param1 not filled', function () {
+	it('throws if not filled', function () {
 		throws(function () {
 			mod.OLSKCryptoShortHash(' ');
 		}, /OLSKErrorInputNotValid/);
