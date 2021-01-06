@@ -193,3 +193,35 @@ describe('OLSKCryptoBcryptKey', function test_OLSKCryptoBcryptKey() {
 	});
 
 });
+
+describe('OLSKCryptoAESEncrypt', function test_OLSKCryptoAESEncrypt() {
+
+	it('throws if param2 not string', function () {
+		throws(function () {
+			mod.OLSKCryptoAESEncrypt(Math.random(), null);
+		}, /OLSKErrorInputNotValid/);
+	});
+	
+	it('returns string', function () {
+		const key = mod.OLSKCryptoBcryptKey(mod.OLSKCryptoBcryptHash(Math.random().toString()));
+		const message = Math.random().toString();
+		deepEqual(mod.OLSKCryptoAESEncrypt(key, message), aesjs.utils.hex.fromBytes((new aesjs.ModeOfOperation.ctr(key)).encrypt(aesjs.utils.utf8.toBytes(message))));
+	});
+	
+});
+
+describe('OLSKCryptoAESDecrypt', function test_OLSKCryptoAESDecrypt() {
+
+	it('throws if param2 not string', function () {
+		throws(function () {
+			mod.OLSKCryptoAESDecrypt(Math.random(), null);
+		}, /OLSKErrorInputNotValid/);
+	});
+	
+	it('returns string', function () {
+		const key = mod.OLSKCryptoBcryptKey(mod.OLSKCryptoBcryptHash(Math.random().toString()));
+		const message = Math.random().toString();
+		deepEqual(mod.OLSKCryptoAESDecrypt(key, mod.OLSKCryptoAESEncrypt(key, message)), message);
+	});
+	
+});

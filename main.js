@@ -115,6 +115,22 @@ const mod = {
 		return aesjs.utils.utf8.toBytes(inputData.replace(bcrypt.getSalt(inputData), ' '));
 	},
 
+	OLSKCryptoAESEncrypt (key, param2) {
+		if (typeof param2 !== 'string') {
+			throw new Error('OLSKErrorInputNotValid');
+		}
+
+		return aesjs.utils.hex.fromBytes((new aesjs.ModeOfOperation.ctr(key)).encrypt(aesjs.utils.utf8.toBytes(param2)));
+	},
+
+	OLSKCryptoAESDecrypt (key, param2) {
+		if (typeof param2 !== 'string') {
+			throw new Error('OLSKErrorInputNotValid');
+		}
+
+		return aesjs.utils.utf8.fromBytes((new aesjs.ModeOfOperation.ctr(key)).decrypt(aesjs.utils.hex.toBytes(param2)));
+	},
+
 };
 
 Object.assign(exports, mod);
