@@ -4,7 +4,7 @@ const mod = require('./main.js');
 
 const cryptico = require('cryptico');
 const aesjs = require('aes-js');
-const bcrypt = require('bcryptjs');
+const pbkdf2 = require('pbkdf2');
 
 const uPairs = async function () {
 	const sender = cryptico.generateRSAKey(Math.random().toString(), 1024);
@@ -150,46 +150,38 @@ describe('OLSKCryptoDecryptSigned', function test_OLSKCryptoDecryptSigned() {
 	
 });
 
-describe('OLSKCryptoBcryptHash', function test_OLSKCryptoBcryptHash() {
+describe('OLSKCryptoPBKDF2Hash', function test_OLSKCryptoPBKDF2Hash() {
 
 	it('throws if not string', function () {
 		throws(function () {
-			mod.OLSKCryptoBcryptHash(null);
+			mod.OLSKCryptoPBKDF2Hash(null);
 		}, /OLSKErrorInputNotValid/);
 	});
 	
 	it('throws if not filled', function () {
 		throws(function () {
-			mod.OLSKCryptoBcryptHash(' ');
+			mod.OLSKCryptoPBKDF2Hash(' ');
 		}, /OLSKErrorInputNotValid/);
 	});
 	
 	it('returns string', function () {
 		const item = Math.random().toString();
-		deepEqual(typeof mod.OLSKCryptoBcryptHash(item), 'string');
-	});
-
-	it('returns unique value', function() {
-		const inputData = Math.random().toString();
-		const item = Array.from(Array(10)).map(function () {
-			return mod.OLSKCryptoBcryptHash(inputData);
-		});
-		deepEqual([...(new Set(item))], item);
+		deepEqual(mod.OLSKCryptoPBKDF2Hash(item), aesjs.utils.hex.fromBytes(pbkdf2.pbkdf2Sync(item, item, 1, 128 / 8, 'sha512')));
 	});
 
 });
 
-describe('OLSKCryptoBcryptKey', function test_OLSKCryptoBcryptKey() {
+describe('OLSKCryptoPBKDF2Key', function test_OLSKCryptoPBKDF2Key() {
 
 	it('throws if not string', function () {
 		throws(function () {
-			mod.OLSKCryptoBcryptKey(null);
+			mod.OLSKCryptoPBKDF2Key(null);
 		}, /OLSKErrorInputNotValid/);
 	});
 	
 	it('returns key', function () {
-		const item = mod.OLSKCryptoBcryptHash(Math.random().toString());
-		deepEqual(mod.OLSKCryptoBcryptKey(item), aesjs.utils.utf8.toBytes(item.replace(bcrypt.getSalt(item), ' ')));
+		const item = mod.OLSKCryptoPBKDF2Hash(Math.random().toString());
+		deepEqual(mod.OLSKCryptoPBKDF2Key(item), aesjs.utils.utf8.toBytes(item));
 	});
 
 });
@@ -203,7 +195,7 @@ describe('OLSKCryptoAESEncrypt', function test_OLSKCryptoAESEncrypt() {
 	});
 	
 	it('returns string', function () {
-		const key = mod.OLSKCryptoBcryptKey(mod.OLSKCryptoBcryptHash(Math.random().toString()));
+		const key = mod.OLSKCryptoPBKDF2Key(mod.OLSKCryptoPBKDF2Hash(Math.random().toString()));
 		const message = Math.random().toString();
 		deepEqual(mod.OLSKCryptoAESEncrypt(key, message), aesjs.utils.hex.fromBytes((new aesjs.ModeOfOperation.ctr(key)).encrypt(aesjs.utils.utf8.toBytes(message))));
 	});
@@ -219,7 +211,7 @@ describe('OLSKCryptoAESDecrypt', function test_OLSKCryptoAESDecrypt() {
 	});
 	
 	it('returns string', function () {
-		const key = mod.OLSKCryptoBcryptKey(mod.OLSKCryptoBcryptHash(Math.random().toString()));
+		const key = mod.OLSKCryptoPBKDF2Key(mod.OLSKCryptoPBKDF2Hash(Math.random().toString()));
 		const message = Math.random().toString();
 		deepEqual(mod.OLSKCryptoAESDecrypt(key, mod.OLSKCryptoAESEncrypt(key, message)), message);
 	});
@@ -241,25 +233,25 @@ describe('OLSKCryptoAESFunctions', function test_OLSKCryptoAESFunctions() {
 	});
 	
 	it('returns object', function () {
-		deepEqual(typeof mod.OLSKCryptoAESFunctions(mod.OLSKCryptoBcryptHash(Math.random().toString())), 'object');
+		deepEqual(typeof mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(Math.random().toString())), 'object');
 	});
 
 	context('OLSKCryptoAESFunctionsEncrypt', function () {
 
 		it('throws if not string', function () {
 			throws(function () {
-				mod.OLSKCryptoAESFunctions(mod.OLSKCryptoBcryptHash(Math.random().toString())).OLSKCryptoAESFunctionsEncrypt(null);
+				mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(Math.random().toString())).OLSKCryptoAESFunctionsEncrypt(null);
 			}, /OLSKErrorInputNotValid/);
 		});
 		
 		it('returns string', function () {
-			const object = mod.OLSKCryptoAESFunctions(mod.OLSKCryptoBcryptHash(Math.random().toString()));
+			const object = mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(Math.random().toString()));
 			const message = Math.random().toString();
 			deepEqual(object.OLSKCryptoAESFunctionsEncrypt(message), mod.OLSKCryptoAESEncrypt(object._OLSKCryptoAESFunctionsKey, message));
 		});
 
 		it('stringifies to native code', function () {
-			deepEqual(mod.OLSKCryptoAESFunctions(mod.OLSKCryptoBcryptHash(Math.random().toString())).OLSKCryptoAESFunctionsEncrypt.toString(), 'function () { [native code] }');
+			deepEqual(mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(Math.random().toString())).OLSKCryptoAESFunctionsEncrypt.toString(), 'function () { [native code] }');
 		});
 	
 	});
@@ -268,18 +260,18 @@ describe('OLSKCryptoAESFunctions', function test_OLSKCryptoAESFunctions() {
 
 		it('throws if not string', function () {
 			throws(function () {
-				mod.OLSKCryptoAESFunctions(mod.OLSKCryptoBcryptHash(Math.random().toString())).OLSKCryptoAESFunctionsDecrypt(null);
+				mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(Math.random().toString())).OLSKCryptoAESFunctionsDecrypt(null);
 			}, /OLSKErrorInputNotValid/);
 		});
 		
 		it('returns string', function () {
-			const object = mod.OLSKCryptoAESFunctions(mod.OLSKCryptoBcryptHash(Math.random().toString()));
+			const object = mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(Math.random().toString()));
 			const message = Math.random().toString();
 			deepEqual(object.OLSKCryptoAESFunctionsDecrypt(object.OLSKCryptoAESFunctionsEncrypt(message)), message);
 		});
 
 		it('stringifies to native code', function () {
-			deepEqual(mod.OLSKCryptoAESFunctions(mod.OLSKCryptoBcryptHash(Math.random().toString())).OLSKCryptoAESFunctionsDecrypt.toString(), 'function () { [native code] }');
+			deepEqual(mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(Math.random().toString())).OLSKCryptoAESFunctionsDecrypt.toString(), 'function () { [native code] }');
 		});
 	
 	});

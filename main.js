@@ -1,6 +1,6 @@
 const _cryptico = require('cryptico');
 const cryptico = _cryptico.default || _cryptico;
-const bcrypt = require('bcryptjs');
+const pbkdf2 = require('pbkdf2');
 const aesjs = require('aes-js');
 
 const mod = {
@@ -95,7 +95,7 @@ const mod = {
 		return data.plaintext;
 	},
 
-	OLSKCryptoBcryptHash (inputData) {
+	OLSKCryptoPBKDF2Hash (inputData) {
 		if (typeof inputData !== 'string') {
 			throw new Error('OLSKErrorInputNotValid');
 		}
@@ -104,15 +104,15 @@ const mod = {
 			throw new Error('OLSKErrorInputNotValid');
 		}
 
-		return bcrypt.hashSync(inputData);
+		return aesjs.utils.hex.fromBytes(pbkdf2.pbkdf2Sync(inputData, inputData, 1, 128 / 8, 'sha512'));
 	},
 
-	OLSKCryptoBcryptKey (inputData) {
+	OLSKCryptoPBKDF2Key (inputData) {
 		if (typeof inputData !== 'string') {
 			throw new Error('OLSKErrorInputNotValid');
 		}
 
-		return aesjs.utils.utf8.toBytes(inputData.replace(bcrypt.getSalt(inputData), ' '));
+		return aesjs.utils.utf8.toBytes(inputData);
 	},
 
 	OLSKCryptoAESEncrypt (key, param2) {
@@ -140,7 +140,7 @@ const mod = {
 			throw new Error('OLSKErrorInputNotValid');
 		}
 
-		const _OLSKCryptoAESFunctionsKey = mod.OLSKCryptoBcryptKey(inputData);
+		const _OLSKCryptoAESFunctionsKey = mod.OLSKCryptoPBKDF2Key(inputData);
 
 		return {
 			_OLSKCryptoAESFunctionsKey,

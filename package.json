@@ -3,7 +3,7 @@
   "main": "main.js",
   "dependencies": {
   	"aes-js": "latest",
-  	"bcryptjs": "latest",
+  	"pbkdf2": "latest",
     "jshashes": "latest",
     "cryptico": "rosano/cryptico"
   }
