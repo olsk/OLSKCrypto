@@ -4,7 +4,6 @@ const mod = require('./main.js');
 
 const cryptico = require('cryptico');
 const aesjs = require('aes-js');
-const pbkdf2 = require('pbkdf2');
 
 const uPairs = async function () {
 	const sender = cryptico.generateRSAKey(Math.random().toString(), 1024);
@@ -166,7 +165,7 @@ describe('OLSKCryptoPBKDF2Hash', function test_OLSKCryptoPBKDF2Hash() {
 	
 	it('returns string', function () {
 		const item = Math.random().toString();
-		deepEqual(mod.OLSKCryptoPBKDF2Hash(item), aesjs.utils.hex.fromBytes(pbkdf2.pbkdf2Sync(item, item, 1, 128 / 8, 'sha512')));
+		deepEqual(mod.OLSKCryptoPBKDF2Hash(item), aesjs.utils.hex.fromBytes(require('crypto').pbkdf2Sync(item, item, 1, 128 / 8, 'sha512')));
 	});
 	
 	it('matches canonical results', function () {

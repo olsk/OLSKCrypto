@@ -1,7 +1,9 @@
 const _cryptico = require('cryptico');
 const cryptico = _cryptico.default || _cryptico;
-const pbkdf2 = require('pbkdf2');
 const aesjs = require('aes-js');
+
+const kBitCount = 128;
+const kSHACount = 512;
 
 const mod = {
 
@@ -104,7 +106,21 @@ const mod = {
 			throw new Error('OLSKErrorInputNotValid');
 		}
 
-		return aesjs.utils.hex.fromBytes(pbkdf2.pbkdf2Sync(inputData, inputData, 1, 128 / 8, 'sha512'));
+		if (typeof window === 'undefined' || window.OLSKRequire) {
+			const _require = typeof window !== 'undefined' ? OLSKRequire : require;
+			return aesjs.utils.hex.fromBytes(_require('crypto').pbkdf2Sync(inputData, inputData, 1, kBitCount / 8, 'sha' + kSHACount));
+		}
+
+		return window.crypto.subtle.importKey('raw', aesjs.utils.utf8.toBytes(inputData), 'PBKDF2', false, ['deriveBits','deriveKey']).then(function (keyMaterial) {
+			return window.crypto.subtle.deriveBits({
+				name: 'PBKDF2',
+				salt: aesjs.utils.utf8.toBytes(inputData),
+				iterations: 1,
+				hash: { name: 'SHA-' + kSHACount },
+			}, keyMaterial, kBitCount).then(function (result) {
+				return aesjs.utils.hex.fromBytes(new Uint8Array(result));
+			});
+		});
 	},
 
 	OLSKCryptoPBKDF2Key (inputData) {
