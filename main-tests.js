@@ -168,6 +168,11 @@ describe('OLSKCryptoPBKDF2Hash', function test_OLSKCryptoPBKDF2Hash() {
 		const item = Math.random().toString();
 		deepEqual(mod.OLSKCryptoPBKDF2Hash(item), aesjs.utils.hex.fromBytes(pbkdf2.pbkdf2Sync(item, item, 1, 128 / 8, 'sha512')));
 	});
+	
+	it('matches canonical results', function () {
+		deepEqual(mod.OLSKCryptoPBKDF2Hash('The quick brown fox jumps over the lazy dog'), 'e2c2d7208d78918f620c0aba9fdd83c8');
+		deepEqual(mod.OLSKCryptoPBKDF2Hash('I love cupcakes'), '4d783f1f6bda8f80d0ed4f5d156dc919');
+	});
 
 });
 
@@ -198,6 +203,12 @@ describe('OLSKCryptoAESEncrypt', function test_OLSKCryptoAESEncrypt() {
 		const key = mod.OLSKCryptoPBKDF2Key(mod.OLSKCryptoPBKDF2Hash(Math.random().toString()));
 		const message = Math.random().toString();
 		deepEqual(mod.OLSKCryptoAESEncrypt(key, message), aesjs.utils.hex.fromBytes((new aesjs.ModeOfOperation.ctr(key)).encrypt(aesjs.utils.utf8.toBytes(message))));
+	});
+	
+	it('matches canonical results', function () {
+		const item = 'alfa';
+		deepEqual(mod.OLSKCryptoAESEncrypt(mod.OLSKCryptoPBKDF2Key(mod.OLSKCryptoPBKDF2Hash('The quick brown fox jumps over the lazy dog')), item), '011b3077');
+		deepEqual(mod.OLSKCryptoAESEncrypt(mod.OLSKCryptoPBKDF2Key(mod.OLSKCryptoPBKDF2Hash('I love cupcakes')), item), '0a50e0e2');
 	});
 	
 });
