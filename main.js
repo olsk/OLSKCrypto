@@ -124,7 +124,7 @@ const mod = {
 		return data.plaintext;
 	},
 
-	OLSKCryptoPBKDF2Hash (inputData) {
+	async OLSKCryptoPBKDF2Key (inputData) {
 		if (typeof inputData !== 'string') {
 			throw new Error('OLSKErrorInputNotValid');
 		}
@@ -135,7 +135,11 @@ const mod = {
 
 		if (typeof window === 'undefined' || window.OLSKRequire) {
 			const _require = typeof window !== 'undefined' ? OLSKRequire : require;
-			return aesjs.utils.hex.fromBytes(_require('crypto').pbkdf2Sync(inputData, inputData, 1, kBitCount / 8, 'sha' + kSHACount));
+			return new Promise(function (res, rej) {
+				return _require('crypto').pbkdf2(inputData, inputData, 1, kBitCount / 8, 'sha' + kSHACount, function (err, result) {
+					return err ? rej(err) : res(result);
+				});
+			});
 		}
 
 		return window.crypto.subtle.importKey('raw', aesjs.utils.utf8.toBytes(inputData), 'PBKDF2', false, ['deriveBits','deriveKey']).then(function (keyMaterial) {
@@ -145,17 +149,13 @@ const mod = {
 				iterations: 1,
 				hash: { name: 'SHA-' + kSHACount },
 			}, keyMaterial, kBitCount).then(function (result) {
-				return aesjs.utils.hex.fromBytes(new Uint8Array(result));
+				return new Uint8Array(result);
 			});
 		});
 	},
 
-	OLSKCryptoPBKDF2Key (inputData) {
-		if (typeof inputData !== 'string') {
-			throw new Error('OLSKErrorInputNotValid');
-		}
-
-		return aesjs.utils.utf8.toBytes(inputData);
+	OLSKCryptoPBKDF2Hash (inputData) {
+		return aesjs.utils.hex.fromBytes(inputData);
 	},
 
 	OLSKCryptoAESEncrypt (key, param2) {
@@ -183,7 +183,7 @@ const mod = {
 			throw new Error('OLSKErrorInputNotValid');
 		}
 
-		const _OLSKCryptoAESFunctionsKey = mod.OLSKCryptoPBKDF2Key(inputData);
+		const _OLSKCryptoAESFunctionsKey = aesjs.utils.hex.toBytes(inputData);
 
 		return {
 			_OLSKCryptoAESFunctionsKey,

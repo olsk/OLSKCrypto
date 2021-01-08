@@ -151,43 +151,42 @@ describe('OLSKCryptoDecryptSigned', function test_OLSKCryptoDecryptSigned() {
 	
 });
 
-describe('OLSKCryptoPBKDF2Hash', function test_OLSKCryptoPBKDF2Hash() {
+describe('OLSKCryptoPBKDF2Key', function test_OLSKCryptoPBKDF2Key() {
 
-	it('throws if not string', function () {
-		throws(function () {
-			mod.OLSKCryptoPBKDF2Hash(null);
-		}, /OLSKErrorInputNotValid/);
+	it('rejects if not string', async function () {
+		await rejects(mod.OLSKCryptoPBKDF2Key(null), /OLSKErrorInputNotValid/);
 	});
 	
-	it('throws if not filled', function () {
-		throws(function () {
-			mod.OLSKCryptoPBKDF2Hash(' ');
-		}, /OLSKErrorInputNotValid/);
+	it('rejects if not filled', async function () {
+		await rejects(mod.OLSKCryptoPBKDF2Key(' '), /OLSKErrorInputNotValid/);
 	});
 	
-	it('returns string', function () {
+	it('returns bits', async function () {
 		const item = Math.random().toString();
-		deepEqual(mod.OLSKCryptoPBKDF2Hash(item), aesjs.utils.hex.fromBytes(require('crypto').pbkdf2Sync(item, item, 1, 128 / 8, 'sha512')));
+		deepEqual(aesjs.utils.hex.fromBytes(await mod.OLSKCryptoPBKDF2Key(item)), aesjs.utils.hex.fromBytes(await new Promise(function (res, rej) {
+			require('crypto').pbkdf2(item, item, 1, 128 / 8, 'sha512', function (err, result) {
+				return err ? rej(err) : res(result);
+			})
+		})));
 	});
 	
-	it('matches canonical results', function () {
-		deepEqual(mod.OLSKCryptoPBKDF2Hash('The quick brown fox jumps over the lazy dog'), 'e2c2d7208d78918f620c0aba9fdd83c8');
-		deepEqual(mod.OLSKCryptoPBKDF2Hash('I love cupcakes'), '4d783f1f6bda8f80d0ed4f5d156dc919');
+	it('matches canonical results', async function () {
+		deepEqual(aesjs.utils.hex.fromBytes(await mod.OLSKCryptoPBKDF2Key('The quick brown fox jumps over the lazy dog')), 'e2c2d7208d78918f620c0aba9fdd83c8');
+		deepEqual(aesjs.utils.hex.fromBytes(await mod.OLSKCryptoPBKDF2Key('I love cupcakes')), '4d783f1f6bda8f80d0ed4f5d156dc919');
 	});
 
 });
 
-describe('OLSKCryptoPBKDF2Key', function test_OLSKCryptoPBKDF2Key() {
+describe('OLSKCryptoPBKDF2Hash', function test_OLSKCryptoPBKDF2Hash() {
 
-	it('throws if not string', function () {
-		throws(function () {
-			mod.OLSKCryptoPBKDF2Key(null);
-		}, /OLSKErrorInputNotValid/);
+	it('returns string', async function () {
+		const item = await mod.OLSKCryptoPBKDF2Key(Math.random().toString());
+		deepEqual(mod.OLSKCryptoPBKDF2Hash(item), aesjs.utils.hex.fromBytes(item));
 	});
 	
-	it('returns key', function () {
-		const item = mod.OLSKCryptoPBKDF2Hash(Math.random().toString());
-		deepEqual(mod.OLSKCryptoPBKDF2Key(item), aesjs.utils.utf8.toBytes(item));
+	it('matches canonical results', async function () {
+		deepEqual(mod.OLSKCryptoPBKDF2Hash(await mod.OLSKCryptoPBKDF2Key('The quick brown fox jumps over the lazy dog')), 'e2c2d7208d78918f620c0aba9fdd83c8');
+		deepEqual(mod.OLSKCryptoPBKDF2Hash(await mod.OLSKCryptoPBKDF2Key('I love cupcakes')), '4d783f1f6bda8f80d0ed4f5d156dc919');
 	});
 
 });
@@ -200,16 +199,16 @@ describe('OLSKCryptoAESEncrypt', function test_OLSKCryptoAESEncrypt() {
 		}, /OLSKErrorInputNotValid/);
 	});
 	
-	it('returns string', function () {
-		const key = mod.OLSKCryptoPBKDF2Key(mod.OLSKCryptoPBKDF2Hash(Math.random().toString()));
+	it('returns string', async function () {
+		const key = await mod.OLSKCryptoPBKDF2Key(Math.random().toString());
 		const message = Math.random().toString();
 		deepEqual(mod.OLSKCryptoAESEncrypt(key, message), aesjs.utils.hex.fromBytes((new aesjs.ModeOfOperation.ctr(key)).encrypt(aesjs.utils.utf8.toBytes(message))));
 	});
 	
-	it('matches canonical results', function () {
+	it('matches canonical results', async function () {
 		const item = 'alfa';
-		deepEqual(mod.OLSKCryptoAESEncrypt(mod.OLSKCryptoPBKDF2Key(mod.OLSKCryptoPBKDF2Hash('The quick brown fox jumps over the lazy dog')), item), '011b3077');
-		deepEqual(mod.OLSKCryptoAESEncrypt(mod.OLSKCryptoPBKDF2Key(mod.OLSKCryptoPBKDF2Hash('I love cupcakes')), item), '0a50e0e2');
+		deepEqual(mod.OLSKCryptoAESEncrypt(await mod.OLSKCryptoPBKDF2Key('The quick brown fox jumps over the lazy dog'), item), '22c054bc');
+		deepEqual(mod.OLSKCryptoAESEncrypt(await mod.OLSKCryptoPBKDF2Key('I love cupcakes'), item), '389380be');
 	});
 	
 });
@@ -222,8 +221,8 @@ describe('OLSKCryptoAESDecrypt', function test_OLSKCryptoAESDecrypt() {
 		}, /OLSKErrorInputNotValid/);
 	});
 	
-	it('returns string', function () {
-		const key = mod.OLSKCryptoPBKDF2Key(mod.OLSKCryptoPBKDF2Hash(Math.random().toString()));
+	it('returns string', async function () {
+		const key = await mod.OLSKCryptoPBKDF2Key(Math.random().toString());
 		const message = Math.random().toString();
 		deepEqual(mod.OLSKCryptoAESDecrypt(key, mod.OLSKCryptoAESEncrypt(key, message)), message);
 	});
@@ -245,25 +244,25 @@ describe('OLSKCryptoAESFunctions', function test_OLSKCryptoAESFunctions() {
 	});
 	
 	it('returns object', function () {
-		deepEqual(typeof mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(Math.random().toString())), 'object');
+		deepEqual(typeof mod.OLSKCryptoAESFunctions(Math.random().toString()), 'object');
 	});
 
 	context('OLSKCryptoAESFunctionsEncrypt', function () {
 
 		it('throws if not string', function () {
 			throws(function () {
-				mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(Math.random().toString())).OLSKCryptoAESFunctionsEncrypt(null);
+				mod.OLSKCryptoAESFunctions(Math.random().toString()).OLSKCryptoAESFunctionsEncrypt(null);
 			}, /OLSKErrorInputNotValid/);
 		});
 		
-		it('returns string', function () {
-			const object = mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(Math.random().toString()));
+		it('returns string', async function () {
+			const object = mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(await mod.OLSKCryptoPBKDF2Key(Math.random().toString())));
 			const message = Math.random().toString();
 			deepEqual(object.OLSKCryptoAESFunctionsEncrypt(message), mod.OLSKCryptoAESEncrypt(object._OLSKCryptoAESFunctionsKey, message));
 		});
 
 		it('stringifies to native code', function () {
-			deepEqual(mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(Math.random().toString())).OLSKCryptoAESFunctionsEncrypt.toString(), 'function () { [native code] }');
+			deepEqual(mod.OLSKCryptoAESFunctions(Math.random().toString()).OLSKCryptoAESFunctionsEncrypt.toString(), 'function () { [native code] }');
 		});
 	
 	});
@@ -272,18 +271,18 @@ describe('OLSKCryptoAESFunctions', function test_OLSKCryptoAESFunctions() {
 
 		it('throws if not string', function () {
 			throws(function () {
-				mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(Math.random().toString())).OLSKCryptoAESFunctionsDecrypt(null);
+				mod.OLSKCryptoAESFunctions(Math.random().toString()).OLSKCryptoAESFunctionsDecrypt(null);
 			}, /OLSKErrorInputNotValid/);
 		});
 		
-		it('returns string', function () {
-			const object = mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(Math.random().toString()));
+		it('returns string', async function () {
+			const object = mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(await mod.OLSKCryptoPBKDF2Key(Math.random().toString())));
 			const message = Math.random().toString();
 			deepEqual(object.OLSKCryptoAESFunctionsDecrypt(object.OLSKCryptoAESFunctionsEncrypt(message)), message);
 		});
 
 		it('stringifies to native code', function () {
-			deepEqual(mod.OLSKCryptoAESFunctions(mod.OLSKCryptoPBKDF2Hash(Math.random().toString())).OLSKCryptoAESFunctionsDecrypt.toString(), 'function () { [native code] }');
+			deepEqual(mod.OLSKCryptoAESFunctions(Math.random().toString()).OLSKCryptoAESFunctionsDecrypt.toString(), 'function () { [native code] }');
 		});
 	
 	});
