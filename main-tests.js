@@ -1,3 +1,5 @@
+(function() {
+
 const { throws, rejects, deepEqual } = require('assert');
 
 const mod = require('./main.js');
@@ -99,7 +101,7 @@ describe('OLSKCryptoEncryptSigned', function test_OLSKCryptoEncryptSigned() {
 		const item = Math.random().toString();
 		const pairs = await uPairs();
 
-		deepEqual(cryptico.decrypt(await mod.OLSKCryptoEncryptSigned(pairs.PAIR_RECEIVER_PUBLIC, pairs.PAIR_SENDER_PRIVATE, item), cryptico.RSAKey.parse(pairs.PAIR_RECEIVER_PRIVATE)), {
+		deepEqual(cryptico.decrypt(await mod.OLSKCryptoEncryptSigned(pairs.PAIR_RECEIVER_PUBLIC, pairs.PAIR_SENDER_PRIVATE, item), (cryptico.RSAKey || RSAKey).parse(pairs.PAIR_RECEIVER_PRIVATE)), {
 			plaintext: item,
 			status: 'success',
 			signature: 'verified',
@@ -287,3 +289,5 @@ describe('OLSKCryptoAESFunctions', function test_OLSKCryptoAESFunctions() {
 	});
 
 });
+	
+})();

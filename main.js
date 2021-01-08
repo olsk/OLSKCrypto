@@ -1,3 +1,30 @@
+if (typeof require === 'undefined') {
+	require = function (inputData) {
+		return {
+			'assert': {
+				throws: chai.assert.throws,
+				rejects: (function (chain, err) {
+					return chain.catch(function(m) { chai.assert.match(m, err); });
+				}),
+				deepEqual: chai.assert.deepEqual,
+			},
+			'crypto': {
+				pbkdf2: (function (chain, err) {}),
+			},
+			'./main.js': window.OLSKCrypto,
+			'cryptico': window.cryptico,
+			'jshashes': window.Hashes,
+			'aes-js': window.aesjs,
+		}[inputData];
+	};
+};
+
+(function(global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+		typeof define === 'function' && define.amd ? define(['exports'], factory) :
+			(factory((global.OLSKCrypto = global.OLSKCrypto || {})));
+}(this, (function(exports) { 'use strict';
+
 const _cryptico = require('cryptico');
 const cryptico = _cryptico.default || _cryptico;
 const aesjs = require('aes-js');
@@ -60,7 +87,7 @@ const mod = {
 			return Promise.reject(new Error('OLSKErrorInputNotValid'));
 		}
 
-		return cryptico.encrypt(param3, param1, cryptico.RSAKey.parse(param2)).cipher;
+		return cryptico.encrypt(param3, param1, (cryptico.RSAKey ||	 RSAKey).parse(param2)).cipher;
 	},
 
 	async OLSKCryptoDecryptSigned (param1, param2, param3) {
@@ -88,7 +115,7 @@ const mod = {
 			return Promise.reject(new Error('OLSKErrorInputNotValid'));
 		}
 
-		const data = cryptico.decrypt(param3, cryptico.RSAKey.parse(param1))
+		const data = cryptico.decrypt(param3, (cryptico.RSAKey ||	 RSAKey).parse(param1))
 
 		if (data.signature !== 'verified' || data.publicKeyString !== param2) {
 			return Promise.reject(new Error('OLSKErrorNotSigned'));
@@ -181,4 +208,10 @@ const mod = {
 
 };
 
-Object.assign(exports, mod);
+	Object.assign(exports, mod);
+
+	Object.defineProperty(exports, '__esModule', {
+		value: true
+	});
+
+})));
