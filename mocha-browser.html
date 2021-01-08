@@ -17,6 +17,25 @@
         checkLeaks: false,
         ui: 'bdd',
       });
+
+      require = function (inputData) {
+        return {
+          'assert': {
+            throws: chai.assert.throws,
+            rejects: (function (chain, err) {
+              return chain.catch(function(m) { chai.assert.match(m, err); });
+            }),
+            deepEqual: chai.assert.deepEqual,
+          },
+          'crypto': {
+            pbkdf2: (function (chain, err) {}),
+          },
+          './main.js': window.OLSKCrypto,
+          'cryptico': window.cryptico,
+          'jshashes': window.Hashes,
+          'aes-js': window.aesjs,
+        }[inputData];
+      };
     </script>
     
     <script src="./node_modules/cryptico/cryptico.js"></script>

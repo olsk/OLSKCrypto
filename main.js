@@ -1,24 +1,3 @@
-if (typeof require === 'undefined') {
-	require = function (inputData) {
-		return {
-			'assert': {
-				throws: chai.assert.throws,
-				rejects: (function (chain, err) {
-					return chain.catch(function(m) { chai.assert.match(m, err); });
-				}),
-				deepEqual: chai.assert.deepEqual,
-			},
-			'crypto': {
-				pbkdf2: (function (chain, err) {}),
-			},
-			'./main.js': window.OLSKCrypto,
-			'cryptico': window.cryptico,
-			'jshashes': window.Hashes,
-			'aes-js': window.aesjs,
-		}[inputData];
-	};
-};
-
 (function(global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 		typeof define === 'function' && define.amd ? define(['exports'], factory) :
