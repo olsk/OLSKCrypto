@@ -161,15 +161,6 @@ describe('OLSKCryptoPBKDF2Key', function test_OLSKCryptoPBKDF2Key() {
 		await rejects(mod.OLSKCryptoPBKDF2Key(' '), /OLSKErrorInputNotValid/);
 	});
 	
-	it('returns bits', async function () {
-		const item = Math.random().toString();
-		deepEqual(aesjs.utils.hex.fromBytes(await mod.OLSKCryptoPBKDF2Key(item)), aesjs.utils.hex.fromBytes(await new Promise(function (res, rej) {
-			require('crypto').pbkdf2(item, item, 1, 128 / 8, 'sha512', function (err, result) {
-				return err ? rej(err) : res(result);
-			})
-		})));
-	});
-	
 	it('matches canonical results', async function () {
 		deepEqual(aesjs.utils.hex.fromBytes(await mod.OLSKCryptoPBKDF2Key('The quick brown fox jumps over the lazy dog')), 'e2c2d7208d78918f620c0aba9fdd83c8');
 		deepEqual(aesjs.utils.hex.fromBytes(await mod.OLSKCryptoPBKDF2Key('I love cupcakes')), '4d783f1f6bda8f80d0ed4f5d156dc919');
@@ -231,6 +222,13 @@ describe('OLSKCryptoAESDecrypt', function test_OLSKCryptoAESDecrypt() {
 
 describe('OLSKCryptoAESFunctions', function test_OLSKCryptoAESFunctions() {
 
+	const uNative = function (inputData) {
+		const token = '[native code]';
+		return inputData.split(token).map(function (e) {
+			return e.trim();
+		}).join(token)
+	};
+
 	it('throws if not string', function () {
 		throws(function () {
 			mod.OLSKCryptoAESFunctions(null);
@@ -262,7 +260,7 @@ describe('OLSKCryptoAESFunctions', function test_OLSKCryptoAESFunctions() {
 		});
 
 		it('stringifies to native code', function () {
-			deepEqual(mod.OLSKCryptoAESFunctions(Math.random().toString()).OLSKCryptoAESFunctionsEncrypt.toString(), 'function () { [native code] }');
+			deepEqual(uNative(mod.OLSKCryptoAESFunctions(Math.random().toString()).OLSKCryptoAESFunctionsEncrypt.toString()), 'function () {[native code]}');
 		});
 	
 	});
@@ -282,7 +280,7 @@ describe('OLSKCryptoAESFunctions', function test_OLSKCryptoAESFunctions() {
 		});
 
 		it('stringifies to native code', function () {
-			deepEqual(mod.OLSKCryptoAESFunctions(Math.random().toString()).OLSKCryptoAESFunctionsDecrypt.toString(), 'function () { [native code] }');
+			deepEqual(uNative(mod.OLSKCryptoAESFunctions(Math.random().toString()).OLSKCryptoAESFunctionsDecrypt.toString()), 'function () {[native code]}');
 		});
 	
 	});
