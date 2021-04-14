@@ -66,7 +66,7 @@ const mod = {
 			return Promise.reject(new Error('OLSKErrorInputNotValid'));
 		}
 
-		return cryptico.encrypt(param3, param1, (cryptico.RSAKey ||	 RSAKey).parse(param2)).cipher;
+		return cryptico.encrypt(param3, param1, (cryptico.RSAKey || RSAKey).parse(param2)).cipher;
 	},
 
 	async OLSKCryptoDecryptSigned (param1, param2, param3) {
@@ -94,7 +94,7 @@ const mod = {
 			return Promise.reject(new Error('OLSKErrorInputNotValid'));
 		}
 
-		const data = cryptico.decrypt(param3, (cryptico.RSAKey ||	 RSAKey).parse(param1))
+		const data = cryptico.decrypt(param3, (cryptico.RSAKey || RSAKey).parse(param1))
 
 		if (data.signature !== 'verified' || data.publicKeyString !== param2) {
 			return Promise.reject(new Error('OLSKErrorNotSigned'));
