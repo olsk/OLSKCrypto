@@ -1,12 +1,8 @@
-(function(global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-		typeof define === 'function' && define.amd ? define(['exports'], factory) :
-			(factory((global.OLSKCrypto = global.OLSKCrypto || {})));
-}(this, (function(exports) { 'use strict';
+(function() {
 
-const _cryptico = require('cryptico');
+const _cryptico = typeof require === 'undefined' ? window.cryptico : require('cryptico');
 const cryptico = _cryptico.default || _cryptico;
-const aesjs = require('aes-js');
+const aesjs = typeof require === 'undefined' ? window.aesjs : require('aes-js');
 
 const kBitCount = 128;
 const kSHACount = 512;
@@ -187,10 +183,12 @@ const mod = {
 
 };
 
+if (typeof exports === 'object') {
 	Object.assign(exports, mod);
+}
 
-	Object.defineProperty(exports, '__esModule', {
-		value: true
-	});
-
-})));
+if (typeof window === 'object') {
+	window.OLSKCrypto = mod;
+}
+	
+})();
